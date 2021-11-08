@@ -12,6 +12,8 @@ public class GameManager : MonoBehaviour
     public float snakeSpeed = 6f;
 
     public int startSnakeLength = 3;
+
+    public const int nrOfObstacles = 8;
     //Main Camera
     public Camera mainCamera;
     //Materials
@@ -19,6 +21,7 @@ public class GameManager : MonoBehaviour
     public Material snakeMaterial;
     public Material headMaterial;
     public Material fruitMaterial;
+    public Material obstacleMaterial;
 
     //Grid system
     Renderer[] gameBlocks;
@@ -38,6 +41,8 @@ public class GameManager : MonoBehaviour
     Bounds targetBounds;
     //Text styling
     GUIStyle mainStyle = new GUIStyle();
+
+    private int[] obstacleIndex = new int[nrOfObstacles];
 
     // Start is called before the first frame update
     void Start()
@@ -77,7 +82,9 @@ public class GameManager : MonoBehaviour
 
         //Generate the Snake with 3 blocks
         InitializeSnake(startSnakeLength);
-        ApplyMaterials();
+        //ApplyMaterials();
+        obstacleIndex = GenerateObstacles();
+        SetMap();
 
         mainStyle.fontSize = 24;
         mainStyle.alignment = TextAnchor.MiddleCenter;
@@ -102,8 +109,17 @@ public class GameManager : MonoBehaviour
         timeTmp = 1;
         snakeDirection = Direction.Right;
         totalPoints = 0;
+        ApplyMaterials();
+        
     }
 
+    int[] GenerateObstacles()
+    {
+        int[] indexes = new int[nrOfObstacles] { Random.Range(0, gameBlocks.Length), Random.Range(0, gameBlocks.Length),
+            Random.Range(0, gameBlocks.Length), Random.Range(0, gameBlocks.Length), Random.Range(0, gameBlocks.Length), 
+            Random.Range(0, gameBlocks.Length), Random.Range(0, gameBlocks.Length), Random.Range(0, gameBlocks.Length)};
+        return indexes;
+    }
     // Update is called once per frame
     void Update()
     {
@@ -141,7 +157,7 @@ public class GameManager : MonoBehaviour
             if (Input.GetKeyDown(KeyCode.Space))
             {
                 InitializeSnake(startSnakeLength);
-                ApplyMaterials();
+                // ApplyMaterials();
                 gameOver = false;
                 gameStarted = false;
             }
@@ -274,6 +290,26 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    void SetMap()
+    {
+        for (int i = 0; i < gameBlocks.Length; i++)
+        {
+            foreach (int item in obstacleIndex)
+            {
+                if (i == item)
+                {
+                    gameBlocks[i].sharedMaterial = obstacleMaterial;
+                    break;
+                }
+                else
+                {
+                    gameBlocks[i].sharedMaterial = groundMaterial;
+                }
+            }
+            
+        }
+    }
+
     void ApplyMaterials()
     {
         //Apply Snake material
@@ -298,7 +334,7 @@ public class GameManager : MonoBehaviour
                 fruitBlockIndex = -1;
                 //Add new block
                 int snakeBlockRotationY = (int)gameBlocks[snakeCoordinates[snakeCoordinates.Count - 1]].transform.localEulerAngles.y;
-                //print(snakeBlockRotationY);
+                
                 if (snakeBlockRotationY == 270)
                 {
                     snakeCoordinates.Add(snakeCoordinates[snakeCoordinates.Count - 1] + areaResolution);
