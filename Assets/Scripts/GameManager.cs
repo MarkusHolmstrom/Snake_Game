@@ -13,7 +13,8 @@ public class GameManager : MonoBehaviour
 
     public int startSnakeLength = 3;
 
-    public const int nrOfObstacles = 8;
+    [Range(0, 40)]
+    public int nrOfObstacles = 8;
     //Main Camera
     public Camera mainCamera;
     //Materials
@@ -42,7 +43,7 @@ public class GameManager : MonoBehaviour
     //Text styling
     GUIStyle mainStyle = new GUIStyle();
 
-    private int[] obstacleIndex = new int[nrOfObstacles];
+    private List<int> obstacleIndex = new List<int>();
 
     // Start is called before the first frame update
     void Start()
@@ -113,11 +114,13 @@ public class GameManager : MonoBehaviour
         
     }
 
-    int[] GenerateObstacles()
+    List<int> GenerateObstacles() // spara som ccords oxå
     {
-        int[] indexes = new int[nrOfObstacles] { Random.Range(0, gameBlocks.Length), Random.Range(0, gameBlocks.Length),
-            Random.Range(0, gameBlocks.Length), Random.Range(0, gameBlocks.Length), Random.Range(0, gameBlocks.Length), 
-            Random.Range(0, gameBlocks.Length), Random.Range(0, gameBlocks.Length), Random.Range(0, gameBlocks.Length)};
+        List<int> indexes = new List<int>();
+        for (int i = 0; i < nrOfObstacles; i++)
+        {
+            indexes.Add(Random.Range(0, gameBlocks.Length));
+        }
         return indexes;
     }
     // Update is called once per frame
@@ -312,10 +315,11 @@ public class GameManager : MonoBehaviour
 
     void ApplyMaterials()
     {
+        SetMap();
         //Apply Snake material
         for (int i = 0; i < gameBlocks.Length; i++)
         {
-            gameBlocks[i].sharedMaterial = groundMaterial;
+            //gameBlocks[i].sharedMaterial = groundMaterial;
             bool fruitPicked = false;
             for (int a = 0; a < snakeCoordinates.Count; a++)
             {

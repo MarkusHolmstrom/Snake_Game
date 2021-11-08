@@ -359,6 +359,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 963194227}
     - target: {fileID: 4570991604840206771, guid: 1eb5fd8bcaa94464787f3afba0a9f252, type: 3}
+      propertyPath: nrOfObstacles
+      value: 27
+      objectReference: {fileID: 0}
+    - target: {fileID: 4570991604840206771, guid: 1eb5fd8bcaa94464787f3afba0a9f252, type: 3}
       propertyPath: obstacleMaterial
       value: 
       objectReference: {fileID: 2100000, guid: d48251fcf96b24b48b78f5db26ef5953, type: 2}
