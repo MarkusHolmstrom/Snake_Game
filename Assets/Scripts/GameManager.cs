@@ -88,9 +88,14 @@ public class GameManager : MonoBehaviour
     {
         snakeCoordinates.Clear();
         int firstlock = Random.Range(0, areaResolution - 1) + (areaResolution * length);
-        snakeCoordinates.Add(firstlock);
-        snakeCoordinates.Add(firstlock - areaResolution);
-        snakeCoordinates.Add(firstlock - (areaResolution * 2));
+
+        for (int i = 0; i < length; i++)
+        {
+            snakeCoordinates.Add(firstlock - (areaResolution * i));
+        }
+        //snakeCoordinates.Add(firstlock);
+        //snakeCoordinates.Add(firstlock - areaResolution);
+        //snakeCoordinates.Add(firstlock - (areaResolution * 2));
 
         gameBlocks[snakeCoordinates[0]].transform.localEulerAngles = new Vector3(90, 90, 0);
         fruitBlockIndex = -1;

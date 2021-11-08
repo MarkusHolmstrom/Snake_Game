@@ -358,5 +358,9 @@ PrefabInstance:
       propertyPath: mainCamera
       value: 
       objectReference: {fileID: 963194227}
+    - target: {fileID: 4570991604840206771, guid: 1eb5fd8bcaa94464787f3afba0a9f252, type: 3}
+      propertyPath: startSnakeLength
+      value: 4
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 1eb5fd8bcaa94464787f3afba0a9f252, type: 3}
