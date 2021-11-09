@@ -43,11 +43,14 @@ public class GameManager : MonoBehaviour
     //Text styling
     GUIStyle mainStyle = new GUIStyle();
 
-    private List<int> obstacleIndex = new List<int>();
+    private List<int> obstacleCoordinates = new List<int>();
+
+    private Snake snake;
 
     // Start is called before the first frame update
     void Start()
     {
+        snake = GetComponent<Snake>();
         //Generate play area
         gameBlocks = new Renderer[areaResolution * areaResolution];
         for (int x = 0; x < areaResolution; x++)
@@ -81,10 +84,10 @@ public class GameManager : MonoBehaviour
         }
         mainCamera.transform.position = new Vector3(targetBounds.center.x, targetBounds.center.y + 1, targetBounds.center.z);
 
-        //Generate the Snake with 3 blocks
+        // Create the Snake 
         InitializeSnake(startSnakeLength);
-        //ApplyMaterials();
-        obstacleIndex = GenerateObstacles();
+
+        obstacleCoordinates = GenerateObstacles();
         SetMap();
 
         mainStyle.fontSize = 24;
@@ -92,37 +95,7 @@ public class GameManager : MonoBehaviour
         mainStyle.normal.textColor = Color.white;
     }
 
-    void InitializeSnake(int length)
-    {
-        snakeCoordinates.Clear();
-        int firstlock = Random.Range(0, areaResolution - 1) + (areaResolution * length);
 
-        for (int i = 0; i < length; i++)
-        {
-            snakeCoordinates.Add(firstlock - (areaResolution * i));
-        }
-        //snakeCoordinates.Add(firstlock);
-        //snakeCoordinates.Add(firstlock - areaResolution);
-        //snakeCoordinates.Add(firstlock - (areaResolution * 2));
-
-        gameBlocks[snakeCoordinates[0]].transform.localEulerAngles = new Vector3(90, 90, 0);
-        fruitBlockIndex = -1;
-        timeTmp = 1;
-        snakeDirection = Direction.Right;
-        totalPoints = 0;
-        ApplyMaterials();
-        
-    }
-
-    List<int> GenerateObstacles() // spara som ccords oxå
-    {
-        List<int> indexes = new List<int>();
-        for (int i = 0; i < nrOfObstacles; i++)
-        {
-            indexes.Add(Random.Range(0, gameBlocks.Length));
-        }
-        return indexes;
-    }
     // Update is called once per frame
     void Update()
     {
@@ -189,8 +162,8 @@ public class GameManager : MonoBehaviour
                     }
 
                     int newCoordinate = snakeCoordinates[0] + (snakeDirection == Direction.Left ? -areaResolution : areaResolution);
-                    //Snake has ran into itself, game over
-                    if (snakeCoordinates.Contains(newCoordinate))
+                    // Snake has ran into itself or hits obstacle: game over
+                    if (snakeCoordinates.Contains(newCoordinate) || obstacleCoordinates.Contains(newCoordinate))
                     {
                         gameOver = true;
                         return;
@@ -207,7 +180,7 @@ public class GameManager : MonoBehaviour
                 }
                 else if (snakeDirection == Direction.Up || snakeDirection == Direction.Down)
                 {
-                    //Detect if snake hits the top or bottom
+                    // Detect if snake hits the top or bottom
                     if (snakeDirection == Direction.Up && (snakeCoordinates[0] + 1) % areaResolution == 0)
                     {
                         gameOver = true;
@@ -220,8 +193,8 @@ public class GameManager : MonoBehaviour
                     }
 
                     int newCoordinate = snakeCoordinates[0] + (snakeDirection == Direction.Down ? -1 : 1);
-                    //Snake has ran into itself, game over
-                    if (snakeCoordinates.Contains(newCoordinate))
+                    // Snake has ran into itself or hits obstacle: game over
+                    if (snakeCoordinates.Contains(newCoordinate) || obstacleCoordinates.Contains(newCoordinate))
                     {
                         gameOver = true;
                         return;
@@ -293,11 +266,37 @@ public class GameManager : MonoBehaviour
         }
     }
 
+
+    void InitializeSnake(int length)
+    {
+        snake.CreateSnake(snakeCoordinates, length, areaResolution);
+        //snakeCoordinates.Add(firstlock);
+        //snakeCoordinates.Add(firstlock - areaResolution);
+        //snakeCoordinates.Add(firstlock - (areaResolution * 2));
+
+        gameBlocks[snakeCoordinates[0]].transform.localEulerAngles = new Vector3(90, 90, 0);
+        fruitBlockIndex = -1;
+        timeTmp = 1;
+        snakeDirection = Direction.Right;
+        totalPoints = 0;
+        ApplyMaterials();
+    }
+
+    List<int> GenerateObstacles()
+    {
+        List<int> indexes = new List<int>();
+        for (int i = 0; i < nrOfObstacles; i++)
+        {
+            indexes.Add(Random.Range(0, gameBlocks.Length));
+        }
+        return indexes;
+    }
+
     void SetMap()
     {
         for (int i = 0; i < gameBlocks.Length; i++)
         {
-            foreach (int item in obstacleIndex)
+            foreach (int item in obstacleCoordinates)
             {
                 if (i == item)
                 {
@@ -309,7 +308,6 @@ public class GameManager : MonoBehaviour
                     gameBlocks[i].sharedMaterial = groundMaterial;
                 }
             }
-            
         }
     }
 
@@ -319,7 +317,6 @@ public class GameManager : MonoBehaviour
         //Apply Snake material
         for (int i = 0; i < gameBlocks.Length; i++)
         {
-            //gameBlocks[i].sharedMaterial = groundMaterial;
             bool fruitPicked = false;
             for (int a = 0; a < snakeCoordinates.Count; a++)
             {
