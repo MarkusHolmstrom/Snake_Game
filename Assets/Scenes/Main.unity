@@ -310,6 +310,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: PickUpManager
       objectReference: {fileID: 0}
+    - target: {fileID: 2414612952084908057, guid: 5616e7f04e9ad164887fe5a1a9b327d1, type: 3}
+      propertyPath: gameManager
+      value: 
+      objectReference: {fileID: 4570991602764349004}
     - target: {fileID: 2414612952084908058, guid: 5616e7f04e9ad164887fe5a1a9b327d1, type: 3}
       propertyPath: m_RootOrder
       value: 3
@@ -356,6 +360,17 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 5616e7f04e9ad164887fe5a1a9b327d1, type: 3}
+--- !u!114 &2414612952101549821 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2414612952084908057, guid: 5616e7f04e9ad164887fe5a1a9b327d1, type: 3}
+  m_PrefabInstance: {fileID: 2414612952101549820}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 22dc2b301137d6c4d820b3322a8e330f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &4570991602764349001
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -412,37 +427,23 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4570991604840206771, guid: 1eb5fd8bcaa94464787f3afba0a9f252, type: 3}
+      propertyPath: pickUp
+      value: 
+      objectReference: {fileID: 2414612952101549821}
+    - target: {fileID: 4570991604840206771, guid: 1eb5fd8bcaa94464787f3afba0a9f252, type: 3}
       propertyPath: mainCamera
       value: 
       objectReference: {fileID: 963194227}
-    - target: {fileID: 4570991604840206771, guid: 1eb5fd8bcaa94464787f3afba0a9f252, type: 3}
-      propertyPath: nrOfObstacles
-      value: 40
-      objectReference: {fileID: 0}
-    - target: {fileID: 4570991604840206771, guid: 1eb5fd8bcaa94464787f3afba0a9f252, type: 3}
-      propertyPath: obstacleMaterial
-      value: 
-      objectReference: {fileID: 2100000, guid: d48251fcf96b24b48b78f5db26ef5953, type: 2}
-    - target: {fileID: 4570991604840206771, guid: 1eb5fd8bcaa94464787f3afba0a9f252, type: 3}
-      propertyPath: startSnakeLength
-      value: 4
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 1eb5fd8bcaa94464787f3afba0a9f252, type: 3}
---- !u!1 &4570991602764349002 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 4570991604840206768, guid: 1eb5fd8bcaa94464787f3afba0a9f252, type: 3}
+--- !u!114 &4570991602764349004 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 4570991604840206771, guid: 1eb5fd8bcaa94464787f3afba0a9f252, type: 3}
   m_PrefabInstance: {fileID: 4570991602764349001}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &4570991602764349003
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4570991602764349002}
+  m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 57a6e3c4285e0f44b8f061369406cdd3, type: 3}
+  m_Script: {fileID: 11500000, guid: dbca9742b538ee3489d026dbd421e41e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 

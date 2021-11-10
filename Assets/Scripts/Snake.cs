@@ -2,18 +2,20 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Body
+public class Node
 {
     public Material material { get; set; }
+    public enum Special { Speed, Armour, Bomb, Guide};
     // pick ups; speed, armour, bomb?, guide (sväng auto nära fara)
 }
 
 public class Snake : MonoBehaviour
 {
-    // https://www.c-sharpcorner.com/article/linked-list-implementation-in-c-sharp/ mer hjälp
-    private LinkedList<Body> _snake = new LinkedList<Body>();
 
-    Body head = new Body();
+    // https://www.c-sharpcorner.com/article/linked-list-implementation-in-c-sharp/ mer hjälp
+    private LinkedList<Node> _snake = new LinkedList<Node>();
+
+    Node head = new Node();
 
     // Start is called before the first frame update
     void Start()
@@ -40,7 +42,7 @@ public class Snake : MonoBehaviour
             }
             else
             {
-                Body body = new Body();
+                Node body = new Node();
                 _snake.AddLast(body);
             }
             
@@ -49,7 +51,7 @@ public class Snake : MonoBehaviour
         return this;
     }
 
-    public void SetMaterial(Body body, Material material)
+    public void SetMaterial(Node body, Material material)
     {
         body.material = material;
     }

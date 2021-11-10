@@ -4,7 +4,18 @@ using UnityEngine;
 
 public class PickUp : MonoBehaviour
 {
+
+    public GameManager gameManager;
+
     public Material pickUpMaterial;
+
+    //public GameObject speed;
+    //public GameObject armour;
+    //public GameObject bomb;
+    //public GameObject guide;
+
+    public GameObject[] pickups = new GameObject[4];
+
 
     // Start is called before the first frame update
     void Start()
@@ -16,5 +27,11 @@ public class PickUp : MonoBehaviour
     void Update()
     {
         
+    }
+
+    public GameObject GetNewPickup()
+    {
+        int randomIndex = Random.Range(0, pickups.Length);
+        return pickups[randomIndex];
     }
 }

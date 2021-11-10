@@ -24,6 +24,11 @@ public class GameManager : MonoBehaviour
     public Material fruitMaterial;
     public Material obstacleMaterial;
 
+    public PickUp pickUp;
+    [Range(1, 10)]
+    public int pickUpRatio = 2;
+    private bool _pickUpsActive = true;
+
     //Grid system
     Renderer[] gameBlocks;
     //Snake coordenates
@@ -33,8 +38,8 @@ public class GameManager : MonoBehaviour
     float timeTmp = 0;
     //Block where the fruit is placed
     int fruitBlockIndex = -1;
-    //Total accumulated points
-    int totalPoints = 0;
+    //Total accumulated score
+    int score = 0;
     //Game status
     bool gameStarted = false;
     bool gameOver = false;
@@ -46,6 +51,8 @@ public class GameManager : MonoBehaviour
     private List<int> obstacleCoordinates = new List<int>();
 
     private Snake snake;
+
+    private int pickUpIndex = -1;
 
     // Start is called before the first frame update
     void Start()
@@ -133,7 +140,6 @@ public class GameManager : MonoBehaviour
             if (Input.GetKeyDown(KeyCode.Space))
             {
                 InitializeSnake(startSnakeLength);
-                // ApplyMaterials();
                 gameOver = false;
                 gameStarted = false;
             }
@@ -249,23 +255,59 @@ public class GameManager : MonoBehaviour
 
         if (fruitBlockIndex < 0)
         {
-            //Place a fruit block
-            int indexTmp = Random.Range(0, gameBlocks.Length - 1);
+            fruitBlockIndex = GetNewIndex();
+            //int indexTmp = Random.Range(0, gameBlocks.Length - 1);
 
-            //Check if the block is not occupied with a snake block
-            for (int i = 0; i < snakeCoordinates.Count; i++)
-            {
-                if (snakeCoordinates[i] == indexTmp)
-                {
-                    indexTmp = -1;
-                    break;
-                }
-            }
+            ////Check if the block is not occupied with a snake or obstacle block
+            //for (int i = 0; i < snakeCoordinates.Count; i++)
+            //{
+            //    if (snakeCoordinates[i] == indexTmp)
+            //    {
+            //        indexTmp = -1;
+            //        break;
+            //    }
+            //}
 
-            fruitBlockIndex = indexTmp;
+            //for (int i = 0; i < obstacleCoordinates.Count; i++)
+            //{
+            //    if (obstacleCoordinates[i] == indexTmp)
+            //    {
+            //        indexTmp = -1;
+            //        break;
+            //    }
+            //}
+
+            //fruitBlockIndex = indexTmp;
+        }
+        if (!_pickUpsActive && pickUpIndex < 0)
+        {
+            pickUpIndex = GetNewIndex();
         }
     }
 
+    int GetNewIndex()
+    {
+        int indexTmp = Random.Range(0, gameBlocks.Length - 1);
+
+        // Check if the block is not occupied with a snake or obstacle block
+        for (int i = 0; i < snakeCoordinates.Count; i++)
+        {
+            if (snakeCoordinates[i] == indexTmp)
+            {
+                return -1;
+            }
+        }
+
+        for (int i = 0; i < obstacleCoordinates.Count; i++)
+        {
+            if (obstacleCoordinates[i] == indexTmp)
+            {
+                return -1;
+            }
+        }
+
+        return indexTmp;
+    }
 
     void InitializeSnake(int length)
     {
@@ -278,7 +320,7 @@ public class GameManager : MonoBehaviour
         fruitBlockIndex = -1;
         timeTmp = 1;
         snakeDirection = Direction.Right;
-        totalPoints = 0;
+        score = 0;
         ApplyMaterials();
     }
 
@@ -314,7 +356,7 @@ public class GameManager : MonoBehaviour
     void ApplyMaterials()
     {
         SetMap();
-        //Apply Snake material
+        // Apply Snake material
         for (int i = 0; i < gameBlocks.Length; i++)
         {
             bool fruitPicked = false;
@@ -326,16 +368,23 @@ public class GameManager : MonoBehaviour
                 }
                 if (snakeCoordinates[a] == fruitBlockIndex)
                 {
-                    //Pick a fruit
+                    // Pick a fruit
                     fruitPicked = true;
+                }
+                if (snakeCoordinates[a] == pickUpIndex)
+                {
+                    // Pick a pick up
+                    pickUpIndex = -1;
+                    _pickUpsActive = true;
                 }
             }
             if (fruitPicked)
             {
                 fruitBlockIndex = -1;
-                //Add new block
+                // Add new block
                 int snakeBlockRotationY = (int)gameBlocks[snakeCoordinates[snakeCoordinates.Count - 1]].transform.localEulerAngles.y;
-                
+                snake.AddToSnake();
+
                 if (snakeBlockRotationY == 270)
                 {
                     snakeCoordinates.Add(snakeCoordinates[snakeCoordinates.Count - 1] + areaResolution);
@@ -352,12 +401,22 @@ public class GameManager : MonoBehaviour
                 {
                     snakeCoordinates.Add(snakeCoordinates[snakeCoordinates.Count - 1] - 1);
                 }
-                totalPoints++;
+                score++;
             }
+
+            if (score % pickUpRatio == 0 && score != 0 && _pickUpsActive)
+            {
+                _pickUpsActive = false;
+            }
+
             if (i == fruitBlockIndex)
             {
                 gameBlocks[i].sharedMaterial = fruitMaterial;
                 gameBlocks[i].transform.localEulerAngles = new Vector3(90, 0, 0);
+            }
+            if (i == pickUpIndex)
+            {
+                gameBlocks[i].sharedMaterial = pickUp.pickUpMaterial;
             }
         }
     }
@@ -375,12 +434,17 @@ public class GameManager : MonoBehaviour
         return false;
     }
 
+    public int GetScore()
+    {
+        return score;
+    }
+
     void OnGUI()
     {
         //Display Player score and other info 
         if (gameStarted)
         {
-            GUI.Label(new Rect(Screen.width / 2 - 100, 5, 200, 20), totalPoints.ToString(), mainStyle);
+            GUI.Label(new Rect(Screen.width / 2 - 100, 5, 200, 20), score.ToString(), mainStyle);
         }
         else
         {
