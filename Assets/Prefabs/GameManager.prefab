@@ -55,7 +55,6 @@ MonoBehaviour:
   fruitMaterial: {fileID: 2100000, guid: b709c6b44466fb04fbe07701e715e218, type: 2}
   obstacleMaterial: {fileID: 2100000, guid: d48251fcf96b24b48b78f5db26ef5953, type: 2}
   pickUp: {fileID: 0}
-  pickUpsActive: 1
   pickUpRatio: 2
 --- !u!114 &4570991602764349003
 MonoBehaviour:

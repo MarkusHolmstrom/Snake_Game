@@ -378,6 +378,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 4570991602764349003, guid: 1eb5fd8bcaa94464787f3afba0a9f252, type: 3}
+      propertyPath: pickUp
+      value: 
+      objectReference: {fileID: 2414612952101549821}
     - target: {fileID: 4570991604840206768, guid: 1eb5fd8bcaa94464787f3afba0a9f252, type: 3}
       propertyPath: m_Name
       value: GameManager
@@ -434,6 +438,10 @@ PrefabInstance:
       propertyPath: mainCamera
       value: 
       objectReference: {fileID: 963194227}
+    - target: {fileID: 4570991604840206771, guid: 1eb5fd8bcaa94464787f3afba0a9f252, type: 3}
+      propertyPath: obstacleGenerationPace
+      value: 5
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 1eb5fd8bcaa94464787f3afba0a9f252, type: 3}
 --- !u!114 &4570991602764349004 stripped

@@ -53,9 +53,13 @@
     <UnityVersion>2020.3.19f1</UnityVersion>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Assets\Scripts\Pickups\ExtraSpeed.cs" />
+    <Compile Include="Assets\Scripts\Pickups\PickUp.cs" />
+    <Compile Include="Assets\Scripts\Pickups\ExtraPoints.cs" />
     <Compile Include="Assets\Scripts\Snake.cs" />
     <Compile Include="Assets\Scripts\GameManager.cs" />
-    <Compile Include="Assets\Scripts\PickUp.cs" />
+    <Compile Include="Assets\Scripts\Pickups\Guide.cs" />
+    <Compile Include="Assets\Scripts\Pickups\ObstacleRemover.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="UnityEngine">
