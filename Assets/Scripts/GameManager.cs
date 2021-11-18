@@ -2,14 +2,17 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-
+// Handles the most of the gameplay, based on this help from world wide web:
 // https://sharpcoderblog.com/blog/snake-game-in-unity-3d
+// It has been modified so it suits the assignements requirements
+
 public class GameManager : MonoBehaviour
 {
     //Game area resolution, the higher number means more blocks
     public int areaResolution = 22;
 
     public float snakeSpeed = 6f;
+    public float speedModifier = 1.0f;
 
     public int startSnakeLength = 3;
 
@@ -20,18 +23,23 @@ public class GameManager : MonoBehaviour
     public int obstacleGenerationPace = 10;
 
     public Camera mainCamera;
-    //Materials
+    // Materials
     public Material groundMaterial;
     public Material snakeMaterial;
     public Material headMaterial;
     public Material fruitMaterial;
     public Material obstacleMaterial;
 
+    public bool fruitPicked = false;
 
     public PickUp pickUp;
     [Range(1, 10)]
     public int pickUpRatio = 2;
     private bool _pickUpsActive = true;
+
+    public int score = 0;
+    // Gets activated from the Guide class
+    public bool guideIsActive = false;
 
     // Grid system
     Renderer[] gameBlocks;
@@ -42,7 +50,6 @@ public class GameManager : MonoBehaviour
     // Index where the fruit is placed
     int fruitBlockIndex = -1;
 
-    int score = 0;
     bool gameStarted = false;
     bool gameOver = false;
     // Camera scaling
@@ -50,7 +57,6 @@ public class GameManager : MonoBehaviour
     // Text styling
     GUIStyle mainStyle = new GUIStyle();
 
-    //private List<int> obstacleCoordinates = new List<int>();
     private Stack<int> obstacleCoordinates = new Stack<int>();
 
     private Snake snake;
@@ -126,8 +132,7 @@ public class GameManager : MonoBehaviour
             else
             {
                 timeTmp = 0;
-                // Update snake material
-                for (int i = 0; i < snake.GetSnakeLength(); i++)
+                for (int i = 0; i < snakeCoordinates.Count; i++)
                 {
                     if (gameBlocks[snakeCoordinates[i]].sharedMaterial == groundMaterial)
                     {
@@ -151,7 +156,7 @@ public class GameManager : MonoBehaviour
         {
             if (timeTmp < 1)
             {
-                timeTmp += Time.deltaTime * snakeSpeed;
+                timeTmp += Time.deltaTime * snakeSpeed * speedModifier;
             }
             else
             {
@@ -161,14 +166,26 @@ public class GameManager : MonoBehaviour
                     // Detect if the Snake hit the sides
                     if (snakeDirection == Direction.Left && snake.GetHeadCoordinate() < areaResolution)
                     {
-                        Debug.Log(1);
-                        gameOver = true;
+                        if (guideIsActive)
+                        {
+                            snakeDirection = GuideChangesDirection(snakeDirection);
+                        }
+                        else
+                        {
+                            gameOver = true;
+                        }
                         return;
                     }
                     else if (snakeDirection == Direction.Right && snake.GetHeadCoordinate() >= (gameBlocks.Length - areaResolution))
                     {
-                        Debug.Log(2);
-                        gameOver = true;
+                        if (guideIsActive)
+                        {
+                            snakeDirection = GuideChangesDirection(snakeDirection);
+                        }
+                        else
+                        {
+                            gameOver = true;
+                        }
                         return;
                     }
 
@@ -176,8 +193,14 @@ public class GameManager : MonoBehaviour
                     // Snake has ran into itself or hits obstacle: game over
                     if (snakeCoordinates.Contains(newCoordinate) || obstacleCoordinates.Contains(newCoordinate))
                     {
-                        Debug.Log(3);
-                        gameOver = true;
+                        if (guideIsActive)
+                        {
+                            snakeDirection = GuideChangesDirection(snakeDirection);
+                        }
+                        else
+                        {
+                            gameOver = true;
+                        }
                         return;
                     }
                     if (newCoordinate < gameBlocks.Length)
@@ -192,14 +215,26 @@ public class GameManager : MonoBehaviour
                     // Detect if snake hits the top or bottom
                     if (snakeDirection == Direction.Up && (snakeCoordinates[0] + 1) % areaResolution == 0)
                     {
-                        Debug.Log(5);
-                        gameOver = true;
+                        if (guideIsActive)
+                        {
+                            snakeDirection = GuideChangesDirection(snakeDirection);
+                        }
+                        else
+                        {
+                            gameOver = true;
+                        }
                         return;
                     }
                     else if (snakeDirection == Direction.Down && (snakeCoordinates[0] + 1) % areaResolution == 1)
                     {
-                        Debug.Log(6);
-                        gameOver = true;
+                        if (guideIsActive)
+                        {
+                            snakeDirection = GuideChangesDirection(snakeDirection);
+                        }
+                        else
+                        {
+                            gameOver = true;
+                        }
                         return;
                     }
 
@@ -207,19 +242,20 @@ public class GameManager : MonoBehaviour
                     // Snake has ran into itself or hits obstacle: game over
                     if (snakeCoordinates.Contains(newCoordinate) || obstacleCoordinates.Contains(newCoordinate))
                     {
-                        Debug.Log(7);
-                        gameOver = true;
+                        if (guideIsActive)
+                        {
+                            snakeDirection = GuideChangesDirection(snakeDirection);
+                        }
+                        else
+                        {
+                            gameOver = true;
+                        }
                         return;
                     }
                     if (newCoordinate < gameBlocks.Length)
                     {
                         // Move snake to new position
                         snakeCoordinates = snake.MoveSnake(newCoordinate);
-                        //for (int i = snake.GetSnakeLength() - 1; i > 0; i--)
-                        //{
-                        //    snakeCoordinates[i] = snakeCoordinates[i - 1];
-                        //}
-                        //snakeCoordinates[0] = newCoordinate;
                         gameBlocks[snakeCoordinates[0]].transform.localEulerAngles = new Vector3(90, (snakeDirection == Direction.Down ? 180 : 0), 0);
                     }
                 }
@@ -298,7 +334,8 @@ public class GameManager : MonoBehaviour
     void InitializeSnake(int length)
     {
         snakeCoordinates.Clear();
-        snake.CreateSnake(length, areaResolution);
+        snake.ClearSnake();
+        snake = snake.CreateSnake(length, areaResolution);
         snakeCoordinates = snake.GetCoordinates();
 
         obstacleCoordinates = GenerateObstacles();
@@ -317,7 +354,6 @@ public class GameManager : MonoBehaviour
         for (int i = 0; i < nrOfObstacles; i++)
         {
             indexes.Push(Random.Range(0, gameBlocks.Length));
-            //indexes.Add(Random.Range(0, gameBlocks.Length));
         }
         return indexes;
     }
@@ -326,11 +362,12 @@ public class GameManager : MonoBehaviour
     {
         for (int i = 0; i < gameBlocks.Length; i++)
         {
-            foreach (int item in obstacleCoordinates)
+            foreach (int coord in obstacleCoordinates)
             {
-                if (i == item)
+                if (i == coord)
                 {
                     gameBlocks[i].sharedMaterial = obstacleMaterial;
+                    gameBlocks[i].transform.localEulerAngles = new Vector3(90, 0, 0);
                     break;
                 }
                 else
@@ -340,6 +377,28 @@ public class GameManager : MonoBehaviour
             }
         }
     }
+    /// <summary>
+    /// Gets activated when the pickup power "Guide" is active and the player is about to lose
+    /// </summary>
+    private Direction GuideChangesDirection(Direction curDirection)
+    {
+        if (curDirection == Direction.Up)
+        {
+            return Direction.Left;
+        }
+        else if (curDirection == Direction.Down)
+        {
+            return Direction.Right;
+        }
+        else if (curDirection == Direction.Left)
+        {
+            return Direction.Down;
+        }
+        else // If right:
+        {
+            return Direction.Up;
+        }
+    }
 
     void ApplyMaterials()
     {
@@ -347,12 +406,12 @@ public class GameManager : MonoBehaviour
         // Apply Snake material
         for (int i = 0; i < gameBlocks.Length; i++)
         {
-            bool fruitPicked = false;
+            fruitPicked = false;
             for (int a = 0; a < snake.GetSnakeLength(); a++)
             {
                 if (snakeCoordinates[a] == i)
                 {
-                    gameBlocks[i].sharedMaterial = (a == 0 ? headMaterial : snakeMaterial);
+                    gameBlocks[i].sharedMaterial = snake.GetMaterialFromLinkedList(snakeCoordinates[a]); 
                 }
                 if (snakeCoordinates[a] == fruitBlockIndex)
                 {
@@ -362,6 +421,7 @@ public class GameManager : MonoBehaviour
                 if (snakeCoordinates[a] == pickUpIndex)
                 {
                     // Pick a pick up
+                    snake.GetRandomPickUp();
                     pickUpIndex = -1;
                     _pickUpsActive = true;
                     score++;
@@ -402,7 +462,6 @@ public class GameManager : MonoBehaviour
 
             if (score % pickUpRatio == 0 && score != 0 && _pickUpsActive)
             {
-                snake.GetRandomPickUp();
                 _pickUpsActive = false;
             }
 
@@ -467,10 +526,6 @@ public class GameManager : MonoBehaviour
         obstacleCoordinates.Pop();
     }
 
-    public int GetScore()
-    {
-        return score;
-    }
 
     void OnGUI()
     {

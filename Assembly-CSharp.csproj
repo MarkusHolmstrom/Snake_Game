@@ -60,6 +60,7 @@
     <Compile Include="Assets\Scripts\GameManager.cs" />
     <Compile Include="Assets\Scripts\Pickups\Guide.cs" />
     <Compile Include="Assets\Scripts\Pickups\ObstacleRemover.cs" />
+    <Compile Include="Assets\Scripts\LinkedSnakeList.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="UnityEngine">

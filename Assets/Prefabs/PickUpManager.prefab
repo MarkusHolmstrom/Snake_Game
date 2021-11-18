@@ -44,9 +44,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   gameManager: {fileID: 0}
+  extraPoints: {fileID: 0}
+  extraSpeed: {fileID: 0}
+  guide: {fileID: 0}
+  obstacleRemover: {fileID: 0}
   pickUpMaterial: {fileID: 2100000, guid: 8508c08ac83f69f4aae7e78cb3d147d3, type: 2}
   speedMaterial: {fileID: 2100000, guid: 494d5ac72f22dfb4ba235db9c226bdd8, type: 2}
-  armourMaterial: {fileID: 2100000, guid: 593637e9729baa445b08626e03921f6b, type: 2}
+  removeObstacleMaterial: {fileID: 2100000, guid: 507c826c6d7c8cd41b8eed29f042c1fc, type: 2}
   guideMaterial: {fileID: 2100000, guid: 2c7dbab7e48444a4689c0f2b1ceb89d6, type: 2}
   extraMaterial: {fileID: 2100000, guid: d746cf8f0c853f94bb444b614c4c40d4, type: 2}
   pickups:

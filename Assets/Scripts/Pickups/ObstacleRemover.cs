@@ -2,17 +2,25 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ObstacleRemover : MonoBehaviour
+// Simple removes an obstacle from the GameManager stack when this is equiped
+public class ObstacleRemover : MonoBehaviour, IPickUp
 {
-    // Start is called before the first frame update
-    void Start()
+    public GameManager gameManager;
+    public float Timer { get; set; } // Not used here
+    public bool Active { get; set; } // Not used here
+
+    public void Activate()
     {
-        
+        gameManager.RemoveObstacle();
     }
 
-    // Update is called once per frame
-    void Update()
+    public IEnumerator StartTimer() // Not used here
     {
-        
+        yield return new WaitForEndOfFrame();
+    }
+
+    public void RemoveMaterial() // Not used here
+    {
+
     }
 }

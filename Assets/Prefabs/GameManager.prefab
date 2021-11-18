@@ -46,16 +46,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   areaResolution: 22
   snakeSpeed: 6
+  speedModifier: 1
   startSnakeLength: 4
   nrOfObstacles: 12
+  obstacleGeneration: 1
+  obstacleGenerationPace: 5
   mainCamera: {fileID: 0}
   groundMaterial: {fileID: 2100000, guid: 79cc740662ce5ae44ade9c32dc41d77a, type: 2}
   snakeMaterial: {fileID: 2100000, guid: ce6b9687153a8374999502310118184d, type: 2}
   headMaterial: {fileID: 2100000, guid: 89b6c29f382b39f438d6c7580525b3b9, type: 2}
   fruitMaterial: {fileID: 2100000, guid: b709c6b44466fb04fbe07701e715e218, type: 2}
   obstacleMaterial: {fileID: 2100000, guid: d48251fcf96b24b48b78f5db26ef5953, type: 2}
+  fruitPicked: 0
   pickUp: {fileID: 0}
   pickUpRatio: 2
+  score: 0
 --- !u!114 &4570991602764349003
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -68,3 +73,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 57a6e3c4285e0f44b8f061369406cdd3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  pickUp: {fileID: 0}
