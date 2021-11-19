@@ -2,13 +2,14 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-// Handles the most of the gameplay, based on this help from world wide web:
+// Handles the most of the gameplay, based on this help from the world wide web:
 // https://sharpcoderblog.com/blog/snake-game-in-unity-3d
 // It has been modified so it suits the assignements requirements
 
 public class GameManager : MonoBehaviour
 {
-    //Game area resolution, the higher number means more blocks
+    // Game area resolution, the higher number means more blocks
+    // Recomended to play with 900x900 resolution
     public int areaResolution = 22;
 
     public float snakeSpeed = 6f;
@@ -334,8 +335,7 @@ public class GameManager : MonoBehaviour
     void InitializeSnake(int length)
     {
         snakeCoordinates.Clear();
-        snake.ClearSnake();
-        snake = snake.CreateSnake(length, areaResolution);
+        snake = snake.CreateNewSnake(length, areaResolution);
         snakeCoordinates = snake.GetCoordinates();
 
         obstacleCoordinates = GenerateObstacles();

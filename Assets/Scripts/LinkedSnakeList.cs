@@ -3,11 +3,11 @@ using System.Collections.Generic;
 
 namespace SnakeList
 {
+    // Linked list, got help from lecture, class mates and this link:
     // https://stackoverflow.com/questions/3823848/creating-a-very-simple-linked-list
     public class LinkedSnakeList<T> : IEnumerable
     {
         private SnakeNode<T> _head;
-        private SnakeNode<T> _tail;
         private int _length = 0;
 
         public LinkedSnakeList()
@@ -27,6 +27,7 @@ namespace SnakeList
         {
             SnakeNode<T> newNode = new SnakeNode<T>(node);
             newNode.Next = null;
+            _length++;
 
             if (_head == null)
             {
@@ -40,8 +41,6 @@ namespace SnakeList
                 temp = temp.Next;
             }
             temp.Next = newNode;
-            _tail = newNode;
-            _length++;
         }
 
         public int Count()
@@ -49,20 +48,9 @@ namespace SnakeList
             return _length;
         }
 
-        public void Clear()
-        {
-            SnakeNode<T> current = _head;
-            while (current.Next != null)
-            {
-                current.Next = current;
-                current = null;
-            }
-            current = null;
-        }
-
         public IEnumerator<T> Enumerator()
         {
-            var current = _head;
+            SnakeNode<T> current = _head;
             while (current != null)
             {
                 yield return current.Node;

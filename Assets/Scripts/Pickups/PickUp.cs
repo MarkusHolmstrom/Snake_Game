@@ -13,7 +13,7 @@ public interface IPickUp
 
 // Manages the pickup powers available in the game, whenever the player reaches a point with a question mark
 // a random power gets picked up and stores in the snakes body, in its linked list. Only one power is available
-// per bodypart (expc the head). 
+// per bodypart (expc the head, that cant have any). Its not a beautiful design, but it fits with the linked list.
 
 public class PickUp : MonoBehaviour
 {
@@ -31,19 +31,6 @@ public class PickUp : MonoBehaviour
     public Material extraMaterial;
 
     public GameObject[] pickups = new GameObject[4];
-
-
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
 
     public GameObject GetNewPickup()
     {

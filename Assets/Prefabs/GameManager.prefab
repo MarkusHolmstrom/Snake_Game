@@ -47,7 +47,7 @@ MonoBehaviour:
   areaResolution: 22
   snakeSpeed: 6
   speedModifier: 1
-  startSnakeLength: 4
+  startSnakeLength: 3
   nrOfObstacles: 12
   obstacleGeneration: 1
   obstacleGenerationPace: 5
@@ -61,6 +61,7 @@ MonoBehaviour:
   pickUp: {fileID: 0}
   pickUpRatio: 2
   score: 0
+  guideIsActive: 0
 --- !u!114 &4570991602764349003
 MonoBehaviour:
   m_ObjectHideFlags: 0

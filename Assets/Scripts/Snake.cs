@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using SnakeList;
 
-// Nodes for the linked list in Snake, on enode per part of the body
+// Nodes for the linked list in Snake, one node per part of the body
 
 public class Node
 {
@@ -19,8 +19,6 @@ public class Snake : MonoBehaviour
     public PickUp pickUp;
     public enum Special { ExtraSpeed, RemoveObstacle, Guide, ExtraPoints };
 
-    // https://www.c-sharpcorner.com/article/linked-list-implementation-in-c-sharp/ mer hjälp
-    //private LinkedList<Node> _snakeNodes = new LinkedList<Node>();
     private LinkedSnakeList<Node> _snakeNodes = new LinkedSnakeList<Node>();
 
     private GameManager gameManager;
@@ -33,13 +31,8 @@ public class Snake : MonoBehaviour
         gameManager = GetComponent<GameManager>();
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
 
-    public Snake CreateSnake(int length, int areaResolution)
+    public Snake CreateNewSnake(int length, int areaResolution)
     {
         _snakeNodes = new LinkedSnakeList<Node>();
         int firstlock = Random.Range(0, areaResolution - 1) + (areaResolution * length);
@@ -121,7 +114,7 @@ public class Snake : MonoBehaviour
         foreach (Node node in _snakeNodes)
         {
             // Save the former position, I made it reversed because sometimes AddLast() made Find().Previous
-            // count the wrong way and the snake wouldnt grow that way every time
+            // count the wrong way and the snake wouldnt grow correct way every time
             formerNodes.AddFirst(node.Coordinate); 
             if (node.Head)
             {
@@ -169,11 +162,6 @@ public class Snake : MonoBehaviour
         }
         Debug.LogError("Error: this should not be reached, not enough nodes in the snake");
         return gameManager.snakeMaterial;
-    }
-
-    public void ClearSnake()
-    {
-        //_snakeNodes.Clear();
     }
 
     public bool RemovePickUpMaterial(Special special)

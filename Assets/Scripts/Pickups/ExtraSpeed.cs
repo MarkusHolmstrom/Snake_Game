@@ -21,17 +21,10 @@ public class ExtraSpeed : MonoBehaviour, IPickUp
         startModifier = gameManager.speedModifier;
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
     public void Activate()
     {
         gameManager.speedModifier = 1.5f;
         StartCoroutine(StartTimer());
-        Debug.Log("extra speed added");
     }
 
     public IEnumerator StartTimer()

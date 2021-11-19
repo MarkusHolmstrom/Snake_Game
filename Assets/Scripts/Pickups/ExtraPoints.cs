@@ -26,7 +26,6 @@ public class ExtraPoints : MonoBehaviour, IPickUp
         if (gameManager.fruitPicked && Active)
         {
             gameManager.score += extraScore;
-            Debug.Log("Extra point added");
         }
     }
 

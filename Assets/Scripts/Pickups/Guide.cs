@@ -19,14 +19,8 @@ public class Guide : MonoBehaviour, IPickUp
         Active = false;
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
     public void Activate()
     {
-        Debug.Log("Guide active");
         gameManager.guideIsActive = true;
         StartCoroutine(StartTimer());
     }
