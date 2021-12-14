@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -10,20 +9,29 @@ public class GameManager : MonoBehaviour
 {
     // Game area resolution, the higher number means more blocks
     // Recomended to play with 900x900 resolution
-    public int areaResolution = 22;
+    [Header("Play with x = y resolution for playability")]
+    [Header("Size of the grid: Grid Size * Grid Size")]
+    [SerializeField]
+    private int _gridSize = 22;
 
-    public float snakeSpeed = 6f;
+    [SerializeField]
+    private float _snakeSpeed = 6f;
     public float speedModifier = 1.0f;
 
-    public int startSnakeLength = 3;
+    [SerializeField]
+    private int _startSnakeLength = 3;
 
     [Range(0, 40)]
-    public int nrOfObstacles = 8;
-    public bool obstacleGeneration = true;
+    [SerializeField]
+    private int _nrOfObstacles = 8;
+    [SerializeField]
+    private bool _obstacleGeneration = true;
     [Range(5, 20)]
-    public int obstacleGenerationPace = 10;
+    [SerializeField]
+    private int _obstacleGenerationPace = 10;
 
-    public Camera mainCamera;
+    [SerializeField]
+    private Camera _mainCamera;
     // Materials
     public Material groundMaterial;
     public Material snakeMaterial;
@@ -35,348 +43,337 @@ public class GameManager : MonoBehaviour
 
     public PickUp pickUp;
     [Range(1, 10)]
-    public int pickUpRatio = 2;
+    private int _pickUpRatio = 2;
     private bool _pickUpsActive = true;
 
-    public int score = 0;
+    [Header("The added points when picking up fruit or power-up")]
+    public int extraScore = 1;
+    [SerializeField]
+    private ExtraPoints _extraPoints;
+    [SerializeField]
+    private int score = 0;
     // Gets activated from the Guide class
     public bool guideIsActive = false;
 
     // Grid system
-    Renderer[] gameBlocks;
-    List<int> snakeCoordinates = new List<int>();
-    enum Direction { Up, Down, Left, Right };
-    Direction snakeDirection = Direction.Right;
-    float timeTmp = 0;
-    // Index where the fruit is placed
-    int fruitBlockIndex = -1;
+    private GameGrid _gameGrid;
 
-    bool gameStarted = false;
-    bool gameOver = false;
+    private List<Coordinate> _snakeCoordinates = new List<Coordinate>();
+    private enum Direction { Up, Down, Left, Right };
+    private Direction _snakeDirection = Direction.Right;
+    private float _timeTmp = 0;
+    // Coordinate where the fruit is placed
+    private Coordinate _fruitBlockCoordinate = new Coordinate(-1, -1);
+
+    private bool _gameStarted = false;
+    private bool _gameOver = false;
     // Camera scaling
-    Bounds targetBounds;
+    private Bounds _targetBounds = new Bounds();
     // Text styling
-    GUIStyle mainStyle = new GUIStyle();
+    private GUIStyle _mainStyle = new GUIStyle();
 
-    private Stack<int> obstacleCoordinates = new Stack<int>();
+    private Stack<Coordinate> _obstacleCoordinates = new Stack<Coordinate>();
 
-    private Snake snake;
+    private Snake _snake;
 
-    private int pickUpIndex = -1;
+    private Coordinate _pickUpCoordinate = new Coordinate(-1, -1);
 
     // Start is called before the first frame update
     void Start()
     {
-        snake = GetComponent<Snake>();
+        _snake = GetComponent<Snake>();
+        _gameGrid = GetComponent<GameGrid>();
+
         // Generate play area
-        gameBlocks = new Renderer[areaResolution * areaResolution];
-        for (int x = 0; x < areaResolution; x++)
-        {
-            for (int y = 0; y < areaResolution; y++)
-            {
-                GameObject quadPrimitive = GameObject.CreatePrimitive(PrimitiveType.Quad);
-                quadPrimitive.transform.position = new Vector3(x, 0, y);
-                Destroy(quadPrimitive.GetComponent<Collider>());
-                quadPrimitive.transform.localEulerAngles = new Vector3(90, 0, 0);
-                quadPrimitive.transform.SetParent(transform);
-                gameBlocks[(x * areaResolution) + y] = quadPrimitive.GetComponent<Renderer>();
-                targetBounds.Encapsulate(gameBlocks[(x * areaResolution) + y].bounds);
-            }
-        }
+        _targetBounds = _gameGrid.SetGrid(_gridSize);
 
         // Scale the MainCamera to fit the game blocks
-        mainCamera.transform.eulerAngles = new Vector3(90, 0, 0);
-        mainCamera.orthographic = true;
+        _mainCamera.transform.eulerAngles = new Vector3(90, 0, 0);
+        _mainCamera.orthographic = true;
         float screenRatio = Screen.width / Screen.height;
-        float targetRatio = targetBounds.size.x / targetBounds.size.y;
+        float targetRatio = _targetBounds.size.x / _targetBounds.size.y;
 
         if (screenRatio >= targetRatio)
         {
-            mainCamera.orthographicSize = targetBounds.size.y / 2;
+            _mainCamera.orthographicSize = _targetBounds.size.y / 2;
         }
         else
         {
-            float differenceInSize = targetRatio / screenRatio;
-            mainCamera.orthographicSize = targetBounds.size.y / 2 * differenceInSize;
+            // Ugly fix to camera when its resultion is set to "Free Aspect",
+            // also works with other resultions when screen is wider than its height
+            _mainCamera.orthographicSize = 11;
         }
-        mainCamera.transform.position = new Vector3(targetBounds.center.x, targetBounds.center.y + 1, targetBounds.center.z);
+        _mainCamera.transform.position = new Vector3(_targetBounds.center.x, _targetBounds.center.y + 1, _targetBounds.center.z);
 
         // Create the Snake 
-        InitializeSnake(startSnakeLength);
+        InitializeSnake(_startSnakeLength);
 
-        SetMap();
-
-        mainStyle.fontSize = 24;
-        mainStyle.alignment = TextAnchor.MiddleCenter;
-        mainStyle.normal.textColor = Color.white;
+        _mainStyle.fontSize = 24;
+        _mainStyle.alignment = TextAnchor.MiddleCenter;
+        _mainStyle.normal.textColor = Color.white;
     }
 
 
     // Update is called once per frame
     void Update()
     {
-        if (!gameStarted)
+        if (!_gameStarted)
         {
             if (Input.anyKeyDown)
             {
-                gameStarted = true;
+                _gameStarted = true;
             }
             return;
         }
-        if (gameOver)
+        if (_gameOver)
         {
             // Flicker the snake blocks
-            if (timeTmp < 0.44f)
+            if (_timeTmp < 0.44f)
             {
-                timeTmp += Time.deltaTime;
+                _timeTmp += Time.deltaTime;
             }
             else
             {
-                timeTmp = 0;
-                for (int i = 0; i < snakeCoordinates.Count; i++)
+                _timeTmp = 0;
+                for (int i = 0; i < _snakeCoordinates.Count; i++)
                 {
-                    if (gameBlocks[snakeCoordinates[i]].sharedMaterial == groundMaterial)
+                    if (_gameGrid.Grid[_snakeCoordinates[i].x, _snakeCoordinates[i].y].GetComponent<Renderer>().material == groundMaterial)
                     {
-                        gameBlocks[snakeCoordinates[i]].sharedMaterial = (i == 0 ? headMaterial : snakeMaterial);
+                        _gameGrid.Grid[_snakeCoordinates[i].x, _snakeCoordinates[i].y].GetComponent<Renderer>().material = (i == 0 ? headMaterial : snakeMaterial);
                     }
                     else
                     {
-                        gameBlocks[snakeCoordinates[i]].sharedMaterial = groundMaterial;
+                        _gameGrid.Grid[_snakeCoordinates[i].x, _snakeCoordinates[i].y].GetComponent<Renderer>().material = groundMaterial;
                     }
                 }
             }
 
             if (Input.GetKeyDown(KeyCode.Space))
             {
-                InitializeSnake(startSnakeLength);
-                gameOver = false;
-                gameStarted = false;
+                InitializeSnake(_startSnakeLength);
+                _gameOver = false;
+                _gameStarted = false;
             }
         }
         else
         {
-            if (timeTmp < 1)
+            if (_timeTmp < 1)
             {
-                timeTmp += Time.deltaTime * snakeSpeed * speedModifier;
+                _timeTmp += Time.deltaTime * _snakeSpeed * speedModifier;
             }
             else
             {
-                timeTmp = 0;
-                if (snakeDirection == Direction.Right || snakeDirection == Direction.Left)
+                _timeTmp = 0;
+                // Grid based movement 
+                Coordinate newCoordinate = GetNewCoordinate(_snake.GetHeadCoordinate(), _snakeDirection);
+                if (_snakeDirection == Direction.Right || _snakeDirection == Direction.Left)
                 {
                     // Detect if the Snake hit the sides
-                    if (snakeDirection == Direction.Left && snake.GetHeadCoordinate() < areaResolution)
+                    if (_snakeDirection == Direction.Left && _snakeCoordinates[0].x <= 0)
                     {
                         if (guideIsActive)
                         {
-                            snakeDirection = GuideChangesDirection(snakeDirection);
+                            _snakeDirection = GuideChangesDirection(_snakeDirection);
                         }
                         else
                         {
-                            gameOver = true;
+                            _gameOver = true;
                         }
                         return;
                     }
-                    else if (snakeDirection == Direction.Right && snake.GetHeadCoordinate() >= (gameBlocks.Length - areaResolution))
+                    else if (_snakeDirection == Direction.Right && _snakeCoordinates[0].x >= _gridSize - 1)
                     {
                         if (guideIsActive)
                         {
-                            snakeDirection = GuideChangesDirection(snakeDirection);
+                            _snakeDirection = GuideChangesDirection(_snakeDirection);
                         }
                         else
                         {
-                            gameOver = true;
+                            _gameOver = true;
                         }
                         return;
                     }
 
-                    int newCoordinate = snake.GetHeadCoordinate() + (snakeDirection == Direction.Left ? -areaResolution : areaResolution);
                     // Snake has ran into itself or hits obstacle: game over
-                    if (snakeCoordinates.Contains(newCoordinate) || obstacleCoordinates.Contains(newCoordinate))
+                    if (_snakeCoordinates.Contains(newCoordinate) || _obstacleCoordinates.Contains(newCoordinate))
                     {
                         if (guideIsActive)
                         {
-                            snakeDirection = GuideChangesDirection(snakeDirection);
+                            _snakeDirection = GuideChangesDirection(_snakeDirection);
                         }
                         else
                         {
-                            gameOver = true;
+                            _gameOver = true;
                         }
                         return;
                     }
-                    if (newCoordinate < gameBlocks.Length)
+                    if (newCoordinate.x < _gridSize && newCoordinate.y < _gridSize &&
+                        newCoordinate.x >= 0 && newCoordinate.y >= 0)
                     {
                         // Move snake to new position
-                        snakeCoordinates = snake.MoveSnake(newCoordinate);
-                        gameBlocks[snakeCoordinates[0]].transform.localEulerAngles = new Vector3(90, (snakeDirection == Direction.Left ? -90 : 90), 0);
+                        _snakeCoordinates = _snake.MoveSnake(newCoordinate);
+                        _gameGrid.Grid[_snakeCoordinates[0].x, _snakeCoordinates[0].y] 
+                            .transform.localEulerAngles = new Vector3(90, (_snakeDirection == Direction.Left ? -90 : 90), 0);
                     }
                 }
-                else if (snakeDirection == Direction.Up || snakeDirection == Direction.Down)
+                else if (_snakeDirection == Direction.Up || _snakeDirection == Direction.Down)
                 {
                     // Detect if snake hits the top or bottom
-                    if (snakeDirection == Direction.Up && (snakeCoordinates[0] + 1) % areaResolution == 0)
+                    if (_snakeDirection == Direction.Up && _snakeCoordinates[0].y >= _gridSize - 1)
                     {
                         if (guideIsActive)
                         {
-                            snakeDirection = GuideChangesDirection(snakeDirection);
+                            _snakeDirection = GuideChangesDirection(_snakeDirection);
                         }
                         else
                         {
-                            gameOver = true;
+                            _gameOver = true;
                         }
                         return;
                     }
-                    else if (snakeDirection == Direction.Down && (snakeCoordinates[0] + 1) % areaResolution == 1)
+                    else if (_snakeDirection == Direction.Down && (_snakeCoordinates[0].y + 1) % _gridSize == 1)
                     {
                         if (guideIsActive)
                         {
-                            snakeDirection = GuideChangesDirection(snakeDirection);
+                            _snakeDirection = GuideChangesDirection(_snakeDirection);
                         }
                         else
                         {
-                            gameOver = true;
+                            _gameOver = true;
                         }
                         return;
                     }
 
-                    int newCoordinate = snakeCoordinates[0] + (snakeDirection == Direction.Down ? -1 : 1);
                     // Snake has ran into itself or hits obstacle: game over
-                    if (snakeCoordinates.Contains(newCoordinate) || obstacleCoordinates.Contains(newCoordinate))
+                    if (_snakeCoordinates.Contains(newCoordinate) || _obstacleCoordinates.Contains(newCoordinate))
                     {
                         if (guideIsActive)
                         {
-                            snakeDirection = GuideChangesDirection(snakeDirection);
+                            _snakeDirection = GuideChangesDirection(_snakeDirection);
                         }
                         else
                         {
-                            gameOver = true;
+                            _gameOver = true;
                         }
                         return;
                     }
-                    if (newCoordinate < gameBlocks.Length)
+                    else if (newCoordinate.x < _gridSize && newCoordinate.y < _gridSize && 
+                        newCoordinate.x >= 0 && newCoordinate.y >= 0)
                     {
                         // Move snake to new position
-                        snakeCoordinates = snake.MoveSnake(newCoordinate);
-                        gameBlocks[snakeCoordinates[0]].transform.localEulerAngles = new Vector3(90, (snakeDirection == Direction.Down ? 180 : 0), 0);
+                        _snakeCoordinates = _snake.MoveSnake(newCoordinate);
+                        _gameGrid.Grid[_snakeCoordinates[0].x, _snakeCoordinates[0].y] 
+                            .transform.localEulerAngles = new Vector3(90, (_snakeDirection == Direction.Down ? 180 : 0), 0);
                     }
                 }
 
                 ApplyMaterials();
             }
-            // Movement
-            if (Input.GetKeyDown(KeyCode.RightArrow))
+            
+        }
+        // Direction
+        if (Input.GetKeyDown(KeyCode.RightArrow))
+        {
+            Coordinate newCoordinate = new Coordinate(_snakeCoordinates[0].x + 1, _snakeCoordinates[0].y);
+            if (!_snakeCoordinates.Contains(newCoordinate))
             {
-                int newCoordinate = snakeCoordinates[0] + areaResolution;
-                if (!ContainsCoordinate(newCoordinate))
-                {
-                    snakeDirection = Direction.Right;
-                }
+                _snakeDirection = Direction.Right;
             }
-            if (Input.GetKeyDown(KeyCode.LeftArrow))
+        }
+        if (Input.GetKeyDown(KeyCode.LeftArrow))
+        {
+            Coordinate newCoordinate = new Coordinate(_snakeCoordinates[0].x - 1, _snakeCoordinates[0].y);
+            if (!_snakeCoordinates.Contains(newCoordinate))
             {
-                int newCoordinate = snakeCoordinates[0] - areaResolution;
-                if (!ContainsCoordinate(newCoordinate))
-                {
-                    snakeDirection = Direction.Left;
-                }
+                _snakeDirection = Direction.Left;
             }
-            if (Input.GetKeyDown(KeyCode.UpArrow))
+        }
+        if (Input.GetKeyDown(KeyCode.UpArrow))
+        {
+            Coordinate newCoordinate = new Coordinate(_snakeCoordinates[0].x, _snakeCoordinates[0].y + 1);
+            if (!_snakeCoordinates.Contains(newCoordinate))
             {
-                int newCoordinate = snakeCoordinates[0] + 1;
-                if (!ContainsCoordinate(newCoordinate))
-                {
-                    snakeDirection = Direction.Up;
-                }
+                _snakeDirection = Direction.Up;
             }
-            if (Input.GetKeyDown(KeyCode.DownArrow))
+        }
+        if (Input.GetKeyDown(KeyCode.DownArrow))
+        {
+            Coordinate newCoordinate = new Coordinate(_snakeCoordinates[0].x, _snakeCoordinates[0].y - 1);
+            if (!_snakeCoordinates.Contains(newCoordinate))
             {
-                int newCoordinate = snakeCoordinates[0] - 1;
-                if (!ContainsCoordinate(newCoordinate))
-                {
-                    snakeDirection = Direction.Down;
-                }
+                _snakeDirection = Direction.Down;
             }
         }
 
-        if (fruitBlockIndex < 0)
+        if (_fruitBlockCoordinate.x < 0)
         {
-            fruitBlockIndex = GetNewIndex();
+            _fruitBlockCoordinate = _gameGrid.GetFreeCoordinate();
         }
-        if (!_pickUpsActive && pickUpIndex < 0 && score % pickUpRatio == 0 && score != 0)
+        if (!_pickUpsActive && _pickUpCoordinate.x < 0 && score % _pickUpRatio == 0 && score != 0)
         {
-            pickUpIndex = GetNewIndex();
+            _pickUpCoordinate = _gameGrid.GetFreeCoordinate();
         }
     }
-
-    int GetNewIndex()
+    /// <summary>
+    /// Grid based movement, based on direction
+    /// </summary>
+    /// <param name="headCoord"></param>
+    /// <param name="direction"></param>
+    /// <returns></returns>
+    private Coordinate GetNewCoordinate(Coordinate headCoord, Direction direction)
     {
-        int indexTmp = Random.Range(0, gameBlocks.Length - 1);
-
-        // Check if the block is not occupied with a snake or obstacle block
-        for (int i = 0; i < snake.GetSnakeLength(); i++)
+        if (direction == Direction.Down)
         {
-            if (snake.GetCoordinates()[i] == indexTmp)
-            {
-                return -1;
-            }
+             headCoord.y--;
         }
-
-        foreach (int item in obstacleCoordinates)
+        else if (direction == Direction.Up)
         {
-            if (item == indexTmp)
-            {
-                return -1;
-            }
+            headCoord.y++;
         }
-
-        return indexTmp;
+        else if (direction == Direction.Left)
+        {
+            headCoord.x--;
+        }
+        else // if (direction == Direction.Right)
+        {
+            headCoord.x++;
+        }
+        return headCoord;
     }
 
-    void InitializeSnake(int length)
+
+    private void InitializeSnake(int length)
     {
-        snakeCoordinates.Clear();
-        snake = snake.CreateNewSnake(length, areaResolution);
-        snakeCoordinates = snake.GetCoordinates();
+        _snakeCoordinates.Clear();
+        _snake = _snake.CreateNewSnake(length, _gridSize);
+        _snakeCoordinates = _snake.GetCoordinates();
 
-        obstacleCoordinates = GenerateObstacles();
-
-        gameBlocks[snakeCoordinates[0]].transform.localEulerAngles = new Vector3(90, 90, 0);
-        fruitBlockIndex = -1;
-        timeTmp = 1;
-        snakeDirection = Direction.Right;
+        _obstacleCoordinates = GenerateObstacles();
+        
+        _gameGrid.Grid[_snakeCoordinates[0].x, _snakeCoordinates[0].y].transform.localEulerAngles = new Vector3(90, 90, 0);
+        _fruitBlockCoordinate.x = -1;
+        _pickUpCoordinate.x = -1;
+        _timeTmp = 1;
+        _snakeDirection = Direction.Right;
         score = 0;
+        speedModifier = 1;
+        _extraPoints.ResetExtraScore();
         ApplyMaterials();
     }
 
-    Stack<int> GenerateObstacles()
+    private Stack<Coordinate> GenerateObstacles()
     {
-        Stack<int> indexes = new Stack<int>();
-        for (int i = 0; i < nrOfObstacles; i++)
+        Stack<Coordinate> indexes = new Stack<Coordinate>();
+        for (int i = 0; i < _nrOfObstacles; i++)
         {
-            indexes.Push(Random.Range(0, gameBlocks.Length));
+            Coordinate obstacleCoord = new Coordinate(Random.Range(0, _gridSize - 1),
+                Random.Range(0, _gridSize - 1));
+            indexes.Push(obstacleCoord);
+            _gameGrid.MakeCoordinateOccupied(obstacleCoord);
         }
         return indexes;
     }
 
-    void SetMap()
-    {
-        for (int i = 0; i < gameBlocks.Length; i++)
-        {
-            foreach (int coord in obstacleCoordinates)
-            {
-                if (i == coord)
-                {
-                    gameBlocks[i].sharedMaterial = obstacleMaterial;
-                    gameBlocks[i].transform.localEulerAngles = new Vector3(90, 0, 0);
-                    break;
-                }
-                else
-                {
-                    gameBlocks[i].sharedMaterial = groundMaterial;
-                }
-            }
-        }
-    }
     /// <summary>
     /// Gets activated when the pickup power "Guide" is active and the player is about to lose
     /// </summary>
@@ -400,102 +397,103 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    void ApplyMaterials()
+    private void ApplyMaterials()
     {
-        SetMap();
         // Apply Snake material
-        for (int i = 0; i < gameBlocks.Length; i++)
+        List<Coordinate> coordinates = _snake.GetCoordinates();
+        for (int a = 0; a < _snake.GetSnakeLength(); a++)
         {
-            fruitPicked = false;
-            for (int a = 0; a < snake.GetSnakeLength(); a++)
+            _gameGrid.Grid[coordinates[a].x, coordinates[a].y].GetComponent<Renderer>().material = _snake.GetMaterialFromLinkedList(a);
+        }
+        for (int x = 0; x < _gridSize; x++)
+        {
+            for (int y = 0; y < _gridSize; y++)
             {
-                if (snakeCoordinates[a] == i)
-                {
-                    gameBlocks[i].sharedMaterial = snake.GetMaterialFromLinkedList(snakeCoordinates[a]); 
-                }
-                if (snakeCoordinates[a] == fruitBlockIndex)
+                fruitPicked = false;
+                Coordinate c = new Coordinate(x, y);
+                if (_snake.GetHeadCoordinate().Equals(_fruitBlockCoordinate))
                 {
                     // Pick a fruit
                     fruitPicked = true;
                 }
-                if (snakeCoordinates[a] == pickUpIndex)
+                if (_snake.GetHeadCoordinate().Equals(_pickUpCoordinate))
                 {
                     // Pick a pick up
-                    snake.GetRandomPickUp();
-                    pickUpIndex = -1;
+                    _snake.GetRandomPickUp();
+                    _pickUpCoordinate.x = -1;
                     _pickUpsActive = true;
-                    score++;
+                    score += extraScore;
                 }
-            }
-            if (fruitPicked)
-            {
-                fruitBlockIndex = -1;
-                // Add new block
-                int snakeBlockRotationY = (int)gameBlocks[snakeCoordinates[snakeCoordinates.Count - 1]].transform.localEulerAngles.y;
 
-                if (snakeBlockRotationY == 270)
+                if (fruitPicked)
                 {
-                    int coordinate = snakeCoordinates[snakeCoordinates.Count - 1] + areaResolution;
-                    snakeCoordinates.Add(coordinate);
-                    snake.AddToSnake(coordinate);
+                    _fruitBlockCoordinate.x = -1;
+                    // Add new block
+                    Coordinate coord = _snake.GetCoordinates()[_snakeCoordinates.Count - 1];
+                    int snakeBlockRotationY = (int)_gameGrid.Grid[coord.x, coord.y].transform.localEulerAngles.y;
+
+                    if (snakeBlockRotationY == 270)
+                    {
+                        Coordinate coordinate = new Coordinate(coord.x + 1, coord.y);
+                        _snakeCoordinates.Add(coordinate);
+                        _snake.AddToSnake(coordinate);
+
+                    }
+                    else if (snakeBlockRotationY == 90)
+                    {
+                        Coordinate coordinate = new Coordinate(coord.x - 1, coord.y);
+                        _snakeCoordinates.Add(coordinate);
+                        _snake.AddToSnake(coordinate);
+                    }
+                    else if (snakeBlockRotationY == 0)
+                    {
+                        Coordinate coordinate = new Coordinate(coord.x, coord.y - 1);
+                        _snakeCoordinates.Add(coordinate);
+                        _snake.AddToSnake(coordinate);
+                    }
+                    else if (snakeBlockRotationY == 180)
+                    {
+                        Coordinate coordinate = new Coordinate(coord.x, coord.y + 1);
+                        _snakeCoordinates.Add(coordinate);
+                        _snake.AddToSnake(coordinate);
+                    }
+                    score += extraScore;
                 }
-                else if (snakeBlockRotationY == 90)
+
+                if (score % _pickUpRatio == 0 && score != 0 && _pickUpsActive)
                 {
-                    int coordinate = snakeCoordinates[snakeCoordinates.Count - 1] - areaResolution;
-                    snakeCoordinates.Add(coordinate);
-                    snake.AddToSnake(coordinate);
+                    _pickUpsActive = false;
                 }
-                else if (snakeBlockRotationY == 0)
+
+                if (_obstacleCoordinates.Contains(c))
                 {
-                    int coordinate = snakeCoordinates[snakeCoordinates.Count - 1] + 1;
-                    snakeCoordinates.Add(coordinate);
-                    snake.AddToSnake(coordinate);
+                    _gameGrid.Grid[x, y].GetComponent<Renderer>().material = obstacleMaterial;
+                    _gameGrid.Grid[x, y].transform.localEulerAngles = new Vector3(90, 0, 0);
                 }
-                else if (snakeBlockRotationY == 180)
+
+                if (c.Equals(_fruitBlockCoordinate) && !fruitPicked)
                 {
-                    int coordinate = snakeCoordinates[snakeCoordinates.Count - 1] - 1;
-                    snakeCoordinates.Add(coordinate);
-                    snake.AddToSnake(coordinate);
+                    _gameGrid.Grid[x,y].GetComponent<Renderer>().material = fruitMaterial;
+                    _gameGrid.Grid[x, y].transform.localEulerAngles = new Vector3(90, 0, 0);
                 }
-                score++;
-            }
+                else if (c.Equals(_pickUpCoordinate))
+                {
+                    _gameGrid.Grid[x, y].GetComponent<Renderer>().material = pickUp.pickUpMaterial;
+                    _gameGrid.Grid[x, y].transform.localEulerAngles = new Vector3(90, 0, 0);
+                }
+                else if (!_snakeCoordinates.Contains(c) && !_obstacleCoordinates.Contains(c))
+                {
+                    _gameGrid.Grid[x, y].GetComponent<Renderer>().material = groundMaterial;
+                    _gameGrid.Grid[x, y].transform.localEulerAngles = new Vector3(90, 0, 0);
+                }
 
-            if (score % pickUpRatio == 0 && score != 0 && _pickUpsActive)
-            {
-                _pickUpsActive = false;
-            }
-
-            if (i == fruitBlockIndex)
-            {
-                gameBlocks[i].sharedMaterial = fruitMaterial;
-                gameBlocks[i].transform.localEulerAngles = new Vector3(90, 0, 0);
-            }
-
-            if (i == pickUpIndex)
-            {
-                gameBlocks[i].sharedMaterial = pickUp.pickUpMaterial;
-                gameBlocks[i].transform.localEulerAngles = new Vector3(90, 0, 0);
-            }
-
-            if (obstacleGeneration && score % obstacleGenerationPace == 0 && score != 0)
-            {
-                AddNewObstacle();
-                score++;
+                if (_obstacleGeneration && score % _obstacleGenerationPace == 0 && score != 0)
+                {
+                    AddNewObstacle();
+                    score += extraScore;
+                }
             }
         }
-    }
-
-    bool ContainsCoordinate(int coordinate)
-    {
-        for (int i = 0; i < snakeCoordinates.Count; i++)
-        {
-            if (snakeCoordinates[i] == coordinate)
-            {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     /// <summary>
@@ -506,10 +504,11 @@ public class GameManager : MonoBehaviour
         bool emptySpotFound = false;
         while (!emptySpotFound)
         {
-            int coordinate = Random.Range(0, gameBlocks.Length);
-            if (!obstacleCoordinates.Contains(coordinate) && !snakeCoordinates.Contains(coordinate))
+            Coordinate coordinate = _gameGrid.GetFreeCoordinate(); 
+            if (!_snakeCoordinates.Contains(coordinate))
             {
-                obstacleCoordinates.Push(coordinate);
+                _obstacleCoordinates.Push(coordinate);
+                _gameGrid.MakeCoordinateOccupied(_obstacleCoordinates.Peek());
                 emptySpotFound = true;
             }
         }
@@ -519,28 +518,29 @@ public class GameManager : MonoBehaviour
     /// </summary>
     public void RemoveObstacle()
     {
-        if (obstacleCoordinates.Count == 0)
+        if (_obstacleCoordinates.Count == 0)
         {
             return;
         }
-        obstacleCoordinates.Pop();
+        _gameGrid.MakeCoordinateFree(_obstacleCoordinates.Peek());
+        _obstacleCoordinates.Pop();
     }
 
 
     void OnGUI()
     {
         //Display Player score and other info 
-        if (gameStarted)
+        if (_gameStarted)
         {
-            GUI.Label(new Rect(Screen.width / 2 - 100, 5, 200, 20), score.ToString(), mainStyle);
+            GUI.Label(new Rect(Screen.width / 2 - 100, 5, 200, 20), score.ToString(), _mainStyle);
         }
         else
         {
-            GUI.Label(new Rect(Screen.width / 2 - 100, Screen.height / 2 - 10, 200, 20), "Press Any Key to Play\n(Use Arrows to Change Direction)", mainStyle);
+            GUI.Label(new Rect(Screen.width / 2 - 100, Screen.height / 2 - 10, 200, 20), "Press Any Key to Play\n(Use Arrows to Change Direction)", _mainStyle);
         }
-        if (gameOver)
+        if (_gameOver)
         {
-            GUI.Label(new Rect(Screen.width / 2 - 100, Screen.height / 2 - 20, 200, 40), "Game Over\n(Press 'Space' to Restart)", mainStyle);
+            GUI.Label(new Rect(Screen.width / 2 - 100, Screen.height / 2 - 20, 200, 40), "Game Over\n(Press 'Space' to Restart)", _mainStyle);
         }
     }
 }

@@ -3,35 +3,30 @@ using System.Collections.Generic;
 using UnityEngine;
 
 // Adds number of points gained during a period of time, builds up over time
-public class ExtraPoints : MonoBehaviour, IPickUp
+public class ExtraPoints : MonoBehaviour, IPowerUp
 {
-    public Snake snake;
-    public GameManager gameManager;
-    public float Timer { get; set; }
-    public float timer = 15;
+    [SerializeField]
+    private Snake _snake;
+    [SerializeField]
+    private GameManager _gameManager;
+    public float Timer { get => _timer; set { _timer = value; } }
+    [SerializeField]
+    private float _timer = 15;
     public bool Active { get; set; }
 
-    public int extraScore = 1;
+    [SerializeField]
+    private int _extraScore = 1;
 
     // Start is called before the first frame update
     void Awake()
     {
-        Timer = timer;
         Active = false;
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        if (gameManager.fruitPicked && Active)
-        {
-            gameManager.score += extraScore;
-        }
     }
 
     public void Activate()
     {
-        extraScore++;
+        _extraScore++;
+        _gameManager.extraScore = _extraScore;
         StartCoroutine(StartTimer());
     }
 
@@ -39,12 +34,18 @@ public class ExtraPoints : MonoBehaviour, IPickUp
     {
         Active = true;
         yield return new WaitForSeconds(Timer);
+        _gameManager.extraScore = 1;
         Active = false;
         RemoveMaterial();
     }
 
     public void RemoveMaterial()
     {
-        snake.RemovePickUpMaterial(Snake.Special.ExtraPoints);
+        _snake.RemovePickUpMaterial(Snake.Special.ExtraPoints);
+    }
+
+    public void ResetExtraScore() 
+    {
+        _extraScore = 1;
     }
 }

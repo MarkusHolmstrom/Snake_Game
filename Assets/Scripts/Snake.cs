@@ -8,7 +8,8 @@ using SnakeList;
 public class Node
 {
     public bool Head { get; set; }
-    public int Coordinate { get; set; }
+    public int IntCoordinate { get; set; }
+    public Coordinate Coordinate { get; set; }
     public GameObject PickUpObject { get; set; }
     public Material SnakeMaterial { get; set; }
 }
@@ -16,43 +17,51 @@ public class Node
 // Handles the most regarding the snake
 public class Snake : MonoBehaviour
 {
-    public PickUp pickUp;
+    [SerializeField]
+    private PickUp _pickUp;
     public enum Special { ExtraSpeed, RemoveObstacle, Guide, ExtraPoints };
 
     private LinkedSnakeList<Node> _snakeNodes = new LinkedSnakeList<Node>();
 
-    private GameManager gameManager;
+    private GameManager _gameManager;
 
-    Node head = new Node();
+    private Node _head = new Node();
+
+    private GameGrid _gameGrid;
 
     // Start is called before the first frame update
     void Awake()
     {
-        gameManager = GetComponent<GameManager>();
+        _gameManager = GetComponent<GameManager>();
+        _gameGrid = GetComponent<GameGrid>();
     }
 
 
     public Snake CreateNewSnake(int length, int areaResolution)
     {
         _snakeNodes = new LinkedSnakeList<Node>();
-        int firstlock = Random.Range(0, areaResolution - 1) + (areaResolution * length);
+        int offset = length + 1;
+        Coordinate headCoord = new Coordinate(Random.Range(offset, areaResolution - offset), 
+            Random.Range(offset, areaResolution - offset));
 
         for (int i = 0; i < length; i++)
         {
             Node node = new Node();
             if (i == 0)
             {
-                _snakeNodes.AddFirst(head);
-                head.Coordinate = firstlock - (areaResolution * i);
-                head.Head = true;
+                _snakeNodes.AddFirst(_head);
+                _head.Coordinate = headCoord;
+                _head.Head = true;
+                node.SnakeMaterial = _gameManager.headMaterial;
             }
             else
             {
                 _snakeNodes.AddLast(node);
-                node.Coordinate = firstlock - (areaResolution * i);
+                node.Coordinate = new Coordinate(headCoord.x - i, headCoord.y);
+                node.SnakeMaterial = _gameManager.snakeMaterial;
             }
-            node.SnakeMaterial = gameManager.snakeMaterial;
             node.PickUpObject = null;
+            _gameGrid.MakeCoordinateOccupied(node.Coordinate);
         }
         return this;
     }
@@ -62,27 +71,10 @@ public class Snake : MonoBehaviour
         return _snakeNodes.Count();
     }
 
-    public void SetCoordinates(List<int> coordinates)
-    {
-        if (coordinates.Count != _snakeNodes.Count())
-        {
-            Debug.LogError("Error: to many coordinates or the snejk is to short!");
-            return;
-        }
-        else
-        {
-            int i = 0;
-            foreach (Node node in _snakeNodes)
-            {
-                node.Coordinate = coordinates[i];
-                i++;
-            }
-        }
-    }
 
-    public List<int> GetCoordinates()
+    public List<Coordinate> GetCoordinates()
     {
-        List<int> temp = new List<int>();
+        List<Coordinate> temp = new List<Coordinate>();
         foreach (Node node in _snakeNodes)
         {
             temp.Add(node.Coordinate);
@@ -90,41 +82,43 @@ public class Snake : MonoBehaviour
         return temp;
     }
 
-    public void AddToSnake(int coordinate)
+    public void AddToSnake(Coordinate coordinate)
     {
         Node node = new Node
         {
             Coordinate = coordinate,
-            SnakeMaterial = gameManager.snakeMaterial,
+            SnakeMaterial = _gameManager.snakeMaterial,
             PickUpObject = null
         };
         _snakeNodes.AddLast(node);
     }
 
-    public int GetHeadCoordinate()
+    public Coordinate GetHeadCoordinate()
     {
-        return head.Coordinate;
+        return _head.Coordinate;
     }
 
-    public List<int> MoveSnake(int newHeadCoordinate)
+    public List<Coordinate> MoveSnake(Coordinate newHeadCoordinate)
     {
-        List<int> coordinates = new List<int>();
+        List<Coordinate> coordinates = new List<Coordinate>();
         // A temporary list to keep the old coordinates
-        LinkedList<int> formerNodes = new LinkedList<int>();
+        LinkedList<Coordinate> formerNodeCoordinates = new LinkedList<Coordinate>();
         foreach (Node node in _snakeNodes)
         {
             // Save the former position, I made it reversed because sometimes AddLast() made Find().Previous
-            // count the wrong way and the snake wouldnt grow correct way every time
-            formerNodes.AddFirst(node.Coordinate); 
+            // count the wrong way and the snake wouldnt grow the correct way every time
+            formerNodeCoordinates.AddFirst(node.Coordinate); 
             if (node.Head)
             {
                 node.Coordinate = newHeadCoordinate;
             }
             else
             {
-                node.Coordinate = formerNodes.Find(node.Coordinate).Next.Value;
+                _gameGrid.MakeCoordinateFree(node.Coordinate); // Safe play to empty the grid that the snake leaves 
+                node.Coordinate = formerNodeCoordinates.Find(node.Coordinate).Next.Value;
             }
-            coordinates.Add(node.Coordinate); 
+            coordinates.Add(node.Coordinate);
+            _gameGrid.MakeCoordinateOccupied(node.Coordinate);
         }
         return coordinates;
     }
@@ -140,47 +134,49 @@ public class Snake : MonoBehaviour
         {
             if (node.PickUpObject == null && !node.Head)
             {
-                node.PickUpObject = pickUp.GetNewPickup();
+                node.PickUpObject = _pickUp.GetNewPickup();
                 node.SnakeMaterial = GetPickUpMaterial(node.PickUpObject);
                 return;
             }
         }
     }
 
-    public Material GetMaterialFromLinkedList(int coordinate)
+    public Material GetMaterialFromLinkedList(int index)
     {
+        int i = -1;
         foreach (Node node in _snakeNodes)
         {
-            if (node.Head && node.Coordinate == coordinate)
+            i++;
+            if (node.Head && 0 == index)
             {
-                return gameManager.headMaterial;
+                return _gameManager.headMaterial;
             }
-            else if (node.Coordinate == coordinate && !node.Head)
+            else if (!node.Head && i == index)
             {
                 return node.SnakeMaterial;
             }
         }
         Debug.LogError("Error: this should not be reached, not enough nodes in the snake");
-        return gameManager.snakeMaterial;
+        return _gameManager.snakeMaterial;
     }
 
     public bool RemovePickUpMaterial(Special special)
     {
         if (special == Special.ExtraPoints)
         {
-            return FindAndChangeMaterialNode(pickUp.pickups[0]);
+            return FindAndChangeMaterialNode(_pickUp.pickups[0]);
         }
         else if (special == Special.ExtraSpeed)
         {
-            return FindAndChangeMaterialNode(pickUp.pickups[1]);
+            return FindAndChangeMaterialNode(_pickUp.pickups[1]);
         }
         else if (special == Special.Guide)
         {
-            return FindAndChangeMaterialNode(pickUp.pickups[2]);
+            return FindAndChangeMaterialNode(_pickUp.pickups[2]);
         }
         else if (special == Special.RemoveObstacle)
         {
-            return FindAndChangeMaterialNode(pickUp.pickups[3]);
+            return FindAndChangeMaterialNode(_pickUp.pickups[3]);
         }
         else
         {
@@ -194,7 +190,8 @@ public class Snake : MonoBehaviour
         {
             if (node.PickUpObject == pickup)
             {
-                node.SnakeMaterial = gameManager.snakeMaterial;
+                node.SnakeMaterial = _gameManager.snakeMaterial;
+                return true;
             }
         }
         return false;
@@ -202,27 +199,27 @@ public class Snake : MonoBehaviour
 
     private Material GetPickUpMaterial(GameObject pickup)
     {
-        // Check if the components are there, bu they are not needed, hence the "discard"
+        // Check if the components are there, but they are not needed, hence the "discard"
         if (pickup.TryGetComponent(out ObstacleRemover _))
         {
-            return pickUp.removeObstacleMaterial;
+            return _pickUp.removeObstacleMaterial;
         }
         else if (pickup.TryGetComponent(out ExtraPoints _))
         {
-            return pickUp.extraMaterial;
+            return _pickUp.extraMaterial;
         }
         else if (pickup.TryGetComponent(out ExtraSpeed _))
         {
-            return pickUp.speedMaterial;
+            return _pickUp.speedMaterial;
         }
         else if (pickup.TryGetComponent(out Guide _))
         {
-            return pickUp.guideMaterial;
+            return _pickUp.guideMaterial;
         }
         else
         {
-            Debug.LogError("Error: this should not be reached!");
-            return gameManager.snakeMaterial;
+            Debug.LogWarning("Warning: this should not be reached! We are out of materials for pick ups!");
+            return _gameManager.snakeMaterial;
         }
     }
 }

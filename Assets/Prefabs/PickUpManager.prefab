@@ -43,11 +43,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 22dc2b301137d6c4d820b3322a8e330f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gameManager: {fileID: 0}
-  extraPoints: {fileID: 0}
-  extraSpeed: {fileID: 0}
-  guide: {fileID: 0}
-  obstacleRemover: {fileID: 0}
+  _gameManager: {fileID: 0}
+  _extraPoints: {fileID: 0}
+  _extraSpeed: {fileID: 0}
+  _guide: {fileID: 0}
+  _obstacleRemover: {fileID: 0}
   pickUpMaterial: {fileID: 2100000, guid: 8508c08ac83f69f4aae7e78cb3d147d3, type: 2}
   speedMaterial: {fileID: 2100000, guid: 494d5ac72f22dfb4ba235db9c226bdd8, type: 2}
   removeObstacleMaterial: {fileID: 2100000, guid: 507c826c6d7c8cd41b8eed29f042c1fc, type: 2}

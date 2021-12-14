@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 4570991604840206770}
   - component: {fileID: 4570991604840206771}
   - component: {fileID: 4570991602764349003}
+  - component: {fileID: 8011789793949781534}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -44,14 +45,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dbca9742b538ee3489d026dbd421e41e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  areaResolution: 22
-  snakeSpeed: 6
+  _gridSize: 22
+  _snakeSpeed: 6
   speedModifier: 1
-  startSnakeLength: 3
-  nrOfObstacles: 12
-  obstacleGeneration: 1
-  obstacleGenerationPace: 5
-  mainCamera: {fileID: 0}
+  _startSnakeLength: 3
+  _nrOfObstacles: 11
+  _obstacleGeneration: 1
+  _obstacleGenerationPace: 10
+  _mainCamera: {fileID: 0}
   groundMaterial: {fileID: 2100000, guid: 79cc740662ce5ae44ade9c32dc41d77a, type: 2}
   snakeMaterial: {fileID: 2100000, guid: ce6b9687153a8374999502310118184d, type: 2}
   headMaterial: {fileID: 2100000, guid: 89b6c29f382b39f438d6c7580525b3b9, type: 2}
@@ -59,7 +60,8 @@ MonoBehaviour:
   obstacleMaterial: {fileID: 2100000, guid: d48251fcf96b24b48b78f5db26ef5953, type: 2}
   fruitPicked: 0
   pickUp: {fileID: 0}
-  pickUpRatio: 2
+  extraScore: 1
+  _extraPoints: {fileID: 0}
   score: 0
   guideIsActive: 0
 --- !u!114 &4570991602764349003
@@ -74,4 +76,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 57a6e3c4285e0f44b8f061369406cdd3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  pickUp: {fileID: 0}
+  _pickUp: {fileID: 0}
+--- !u!114 &8011789793949781534
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4570991604840206768}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 58a23b717c407614d83c9262da916138, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

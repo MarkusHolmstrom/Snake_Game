@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public interface IPickUp
+public interface IPowerUp
 {
     float Timer { get; set; }
     bool Active { get; set; }
@@ -17,12 +17,19 @@ public interface IPickUp
 
 public class PickUp : MonoBehaviour
 {
-    public GameManager gameManager;
-    public ExtraPoints extraPoints;
-    public ExtraSpeed extraSpeed;
-    public Guide guide;
-    public ObstacleRemover obstacleRemover;
+    // Private variables, set in editor:
+    [SerializeField]
+    private GameManager _gameManager;
+    [SerializeField]
+    private ExtraPoints _extraPoints;
+    [SerializeField]
+    private ExtraSpeed _extraSpeed;
+    [SerializeField]
+    private Guide _guide;
+    [SerializeField]
+    private ObstacleRemover _obstacleRemover;
 
+    // Public variables:
     public Material pickUpMaterial;
 
     public Material speedMaterial;
@@ -37,19 +44,19 @@ public class PickUp : MonoBehaviour
         int randomIndex = Random.Range(0, pickups.Length);
         if (randomIndex == 0)
         {
-            extraPoints.Activate();
+            _extraPoints.Activate();
         }
         else if(randomIndex == 1)
         {
-            extraSpeed.Activate();
+            _extraSpeed.Activate();
         }
         else if (randomIndex == 2)
         {
-            guide.Activate();
+            _guide.Activate();
         }
         else if (randomIndex == 3)
         {
-            obstacleRemover.Activate();
+            _obstacleRemover.Activate();
         }
         return pickups[randomIndex];
     }

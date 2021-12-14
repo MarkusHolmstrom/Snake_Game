@@ -43,7 +43,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dd997b04d58517840a6967d356dae13b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  snake: {fileID: 0}
-  gameManager: {fileID: 0}
-  timer: 15
-  extraScore: 1
+  _snake: {fileID: 0}
+  _gameManager: {fileID: 0}
+  _timer: 15
+  _extraScore: 1

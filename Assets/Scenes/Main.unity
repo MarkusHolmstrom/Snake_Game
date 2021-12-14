@@ -307,11 +307,11 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 324778079723892084, guid: 0526fc279f873744b9c489c3bb6e90a7, type: 3}
-      propertyPath: snake
+      propertyPath: _snake
       value: 
       objectReference: {fileID: 4570991602764349002}
     - target: {fileID: 324778079723892084, guid: 0526fc279f873744b9c489c3bb6e90a7, type: 3}
-      propertyPath: gameManager
+      propertyPath: _gameManager
       value: 
       objectReference: {fileID: 4570991602764349004}
     - target: {fileID: 457599337234832173, guid: 0526fc279f873744b9c489c3bb6e90a7, type: 3}
@@ -392,23 +392,23 @@ PrefabInstance:
       value: PickUpManager
       objectReference: {fileID: 0}
     - target: {fileID: 2414612952084908057, guid: 5616e7f04e9ad164887fe5a1a9b327d1, type: 3}
-      propertyPath: guide
+      propertyPath: _guide
       value: 
       objectReference: {fileID: 3468064987878141346}
     - target: {fileID: 2414612952084908057, guid: 5616e7f04e9ad164887fe5a1a9b327d1, type: 3}
-      propertyPath: extraSpeed
+      propertyPath: _extraSpeed
       value: 
       objectReference: {fileID: 324778079723892084}
     - target: {fileID: 2414612952084908057, guid: 5616e7f04e9ad164887fe5a1a9b327d1, type: 3}
-      propertyPath: extraPoints
+      propertyPath: _extraPoints
       value: 
       objectReference: {fileID: 5799422085082583008}
     - target: {fileID: 2414612952084908057, guid: 5616e7f04e9ad164887fe5a1a9b327d1, type: 3}
-      propertyPath: gameManager
+      propertyPath: _gameManager
       value: 
       objectReference: {fileID: 4570991602764349004}
     - target: {fileID: 2414612952084908057, guid: 5616e7f04e9ad164887fe5a1a9b327d1, type: 3}
-      propertyPath: obstacleRemover
+      propertyPath: _obstacleRemover
       value: 
       objectReference: {fileID: 8174516026015066088}
     - target: {fileID: 2414612952084908057, guid: 5616e7f04e9ad164887fe5a1a9b327d1, type: 3}
@@ -492,11 +492,11 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 3468064987878141346, guid: 128e811aedfabc04e9663a2f955b6587, type: 3}
-      propertyPath: snake
+      propertyPath: _snake
       value: 
       objectReference: {fileID: 4570991602764349002}
     - target: {fileID: 3468064987878141346, guid: 128e811aedfabc04e9663a2f955b6587, type: 3}
-      propertyPath: gameManager
+      propertyPath: _gameManager
       value: 
       objectReference: {fileID: 4570991602764349004}
     - target: {fileID: 4322157085908390145, guid: 128e811aedfabc04e9663a2f955b6587, type: 3}
@@ -573,7 +573,7 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 4570991602764349003, guid: 1eb5fd8bcaa94464787f3afba0a9f252, type: 3}
-      propertyPath: pickUp
+      propertyPath: _pickUp
       value: 
       objectReference: {fileID: 2414612952101549821}
     - target: {fileID: 4570991604840206768, guid: 1eb5fd8bcaa94464787f3afba0a9f252, type: 3}
@@ -629,9 +629,17 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 2414612952101549821}
     - target: {fileID: 4570991604840206771, guid: 1eb5fd8bcaa94464787f3afba0a9f252, type: 3}
-      propertyPath: mainCamera
+      propertyPath: _gridSize
+      value: 22
+      objectReference: {fileID: 0}
+    - target: {fileID: 4570991604840206771, guid: 1eb5fd8bcaa94464787f3afba0a9f252, type: 3}
+      propertyPath: _mainCamera
       value: 
       objectReference: {fileID: 963194227}
+    - target: {fileID: 4570991604840206771, guid: 1eb5fd8bcaa94464787f3afba0a9f252, type: 3}
+      propertyPath: _extraPoints
+      value: 
+      objectReference: {fileID: 5799422085082583008}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 1eb5fd8bcaa94464787f3afba0a9f252, type: 3}
 --- !u!114 &4570991602764349002 stripped
@@ -712,11 +720,11 @@ PrefabInstance:
       value: ExtraPoints
       objectReference: {fileID: 0}
     - target: {fileID: 5799422085082583008, guid: ae2998f335b3ba74dbbfddda7a5525f3, type: 3}
-      propertyPath: snake
+      propertyPath: _snake
       value: 
       objectReference: {fileID: 4570991602764349002}
     - target: {fileID: 5799422085082583008, guid: ae2998f335b3ba74dbbfddda7a5525f3, type: 3}
-      propertyPath: gameManager
+      propertyPath: _gameManager
       value: 
       objectReference: {fileID: 4570991602764349004}
     m_RemovedComponents: []

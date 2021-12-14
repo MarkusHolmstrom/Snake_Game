@@ -3,27 +3,29 @@ using System.Collections.Generic;
 using UnityEngine;
 
 // Makes the snake go faster for a period of time when equiped
-public class ExtraSpeed : MonoBehaviour, IPickUp
+public class ExtraSpeed : MonoBehaviour, IPowerUp
 {
-    public Snake snake;
-    public GameManager gameManager;
-    public float Timer { get; set; }
-    public float timer = 15;
+    [SerializeField]
+    private Snake _snake;
+    [SerializeField]
+    private GameManager _gameManager;
+    public float Timer { get => _timer; set { _timer = value; } }
+    [SerializeField]
+    private float _timer = 15;
     public bool Active { get; set; }
 
-    private float startModifier;
+    private float _startModifier;
 
     // Start is called before the first frame update
     void Awake()
     {
-        Timer = timer;
         Active = false;
-        startModifier = gameManager.speedModifier;
+        _startModifier = _gameManager.speedModifier;
     }
 
     public void Activate()
     {
-        gameManager.speedModifier = 1.5f;
+        _gameManager.speedModifier = 1.5f;
         StartCoroutine(StartTimer());
     }
 
@@ -31,13 +33,13 @@ public class ExtraSpeed : MonoBehaviour, IPickUp
     {
         Active = true;
         yield return new WaitForSeconds(Timer);
-        gameManager.speedModifier = startModifier;
+        _gameManager.speedModifier = _startModifier;
         Active = false;
         RemoveMaterial();
     }
 
     public void RemoveMaterial()
     {
-        snake.RemovePickUpMaterial(Snake.Special.ExtraSpeed);
+        _snake.RemovePickUpMaterial(Snake.Special.ExtraSpeed);
     }
 }
